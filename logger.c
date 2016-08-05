@@ -6,18 +6,6 @@
 
 #include "logger.h"
 
-#define LOG_MODE_CONSOLE	0x00000001
-#define LOG_MODE_FILE		0x00000002
-
-enum
-{
-	LOG_LEVEL_DONTCARE = 0,
-	LOG_LEVEL_DEBUG = 10,
-	LOG_LEVEL_INFO = 20,
-	LOG_LEVEL_ERROR = 30
-};
-
-
 static FILE *gFp = NULL;
 static int gLevel = LOG_LEVEL_DONTCARE, gMode = LOG_MODE_CONSOLE;
 static char* gLogName = NULL;
@@ -33,11 +21,11 @@ void loggerInit(int mode, char *logName, int setLevel)
 	gLevel = setLevel;
 	gLogName = logName;
 	gMode = mode;
-	if(mode | LOG_MODE_CONSOLE)
+	if(mode & LOG_MODE_CONSOLE)
 	{
 		fprintf(stdout, "logger console mode is enable\n");
 	}
-	if(mode | LOG_MODE_FILE)
+	if(mode & LOG_MODE_FILE)
 	{
 		FILE *fp;
 		buf = (char*)malloc(256*sizeof(char));
@@ -114,14 +102,14 @@ void logFormat(const char* level, const char* message, va_list args)
 
 	if(logLevel >= gLevel)
 	{
-		if(gMode | LOG_MODE_CONSOLE)
+		if(gMode & LOG_MODE_CONSOLE)
 		{
-			fprintf(ftmp, "%d-%02d-%02d %d:%d:%d - %s - %s -", ltm->tm_year, ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec, gLogName, level);  
+			fprintf(ftmp, "%d-%02d-%02d %02d:%02d:%02d - %s - %s -", (1900+ltm->tm_year), ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec, gLogName, level);  
 			vfprintf(ftmp, message, args);
 		}
-		if(gMode | LOG_MODE_FILE)
+		if(gMode & LOG_MODE_FILE)
 		{
-			fprintf(gFp, "%d-%02d-%02d %d:%d:%d - %s - %s -", ltm->tm_year, ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec, gLogName, level);  
+			fprintf(gFp, "%d-%02d-%02d %02d:%02d:%02d - %s - %s -", (1900+ltm->tm_year), ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec, gLogName, level);  
 			vfprintf(gFp, message, args);    
 		}
 	}
@@ -160,7 +148,7 @@ void loggerExit()
 
 void main()
 {
-	loggerInit((LOG_MODE_CONSOLE|LOG_MODE_FILE),"cubici", LOG_LEVEL_DONTCARE);
+	loggerInit((LOG_MODE_CONSOLE|LOG_MODE_FILE),"logTest", LOG_LEVEL_DONTCARE);
 	logInfo("log info test\n");
 	loggerExit();
 }
